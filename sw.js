@@ -1,4 +1,4 @@
-const CACHE_NAME = "shopping-basket-v1";
+const CACHE_NAME = "shopping-basket-v2";
 const ASSETS = ["./", "./index.html", "./styles.css", "./app.js", "./manifest.webmanifest", "./icon.svg", "./apple-touch-icon.png"];
 
 self.addEventListener("install", (event) => {
