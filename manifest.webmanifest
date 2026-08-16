@@ -1,0 +1,15 @@
+{
+  "name": "買い物かごメモ",
+  "short_name": "かごメモ",
+  "description": "買い物中に予算と支払額をすぐ確認できるメモ",
+  "lang": "ja",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#fff8ef",
+  "theme_color": "#f58a3b",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" },
+    { "src": "apple-touch-icon.png", "sizes": "180x180", "type": "image/png" }
+  ]
+}
