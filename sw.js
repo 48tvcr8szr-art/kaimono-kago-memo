@@ -1,5 +1,5 @@
-const CACHE_NAME = "shopping-basket-v4";
-const ASSETS = ["./", "./index.html", "./styles.css?v=3", "./app.js", "./manifest.webmanifest", "./icon.svg?v=3", "./apple-touch-icon.png?v=3"];
+const CACHE_NAME = "shopping-basket-v5";
+const ASSETS = ["./?v=5", "./index.html", "./styles.css?v=5", "./app.js?v=5", "./manifest.webmanifest?v=5", "./icon.svg?v=5", "./apple-touch-icon.png?v=5"];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS)));
@@ -16,6 +16,18 @@ self.addEventListener("activate", (event) => {
 
 self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET") return;
+  if (event.request.mode === "navigate") {
+    event.respondWith(
+      fetch(event.request)
+        .then((response) => {
+          const copy = response.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put("./index.html", copy));
+          return response;
+        })
+        .catch(() => caches.match("./index.html"))
+    );
+    return;
+  }
   event.respondWith(
     caches.match(event.request).then((cached) => cached || fetch(event.request).then((response) => {
       const copy = response.clone();
