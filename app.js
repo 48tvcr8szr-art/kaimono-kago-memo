@@ -25,7 +25,8 @@ const el = {
   editName: document.querySelector("#editName"),
   editPrice: document.querySelector("#editPrice"),
   editQuantity: document.querySelector("#editQuantity"),
-  saveEdit: document.querySelector("#saveEditButton")
+  saveEdit: document.querySelector("#saveEditButton"),
+  deleteEdit: document.querySelector("#deleteEditButton")
 };
 
 el.budget.value = state.budget;
@@ -67,11 +68,6 @@ el.list.addEventListener("click", (event) => {
   const button = event.target.closest("button[data-id]");
   if (!button) return;
   const id = button.dataset.id;
-  if (button.classList.contains("delete-button")) {
-    state.items = state.items.filter((item) => item.id !== id);
-    saveAndRender();
-    return;
-  }
   const item = state.items.find((entry) => entry.id === id);
   if (!item) return;
   editingId = id;
@@ -94,6 +90,14 @@ el.editForm.addEventListener("submit", (event) => {
     item.price = price;
     item.quantity = quantity;
   }
+  editingId = null;
+  el.dialog.close();
+  saveAndRender();
+});
+
+el.deleteEdit.addEventListener("click", () => {
+  if (!editingId) return;
+  state.items = state.items.filter((item) => item.id !== editingId);
   editingId = null;
   el.dialog.close();
   saveAndRender();
@@ -188,13 +192,7 @@ function render() {
     edit.textContent = "直す";
     edit.setAttribute("aria-label", `${item.name}を直す`);
 
-    const remove = document.createElement("button");
-    remove.type = "button";
-    remove.className = "delete-button";
-    remove.dataset.id = item.id;
-    remove.textContent = "×";
-    remove.setAttribute("aria-label", `${item.name}を消す`);
-    row.append(info, edit, remove);
+    row.append(info, edit);
     return row;
   }));
 }
