@@ -5,7 +5,7 @@ let editingId = null;
 
 const el = {
   budget: document.querySelector("#budgetInput"),
-  coupon: document.querySelector("#couponToggle"),
+  discountInput: document.querySelector("#discountInput"),
   form: document.querySelector("#itemForm"),
   name: document.querySelector("#itemName"),
   price: document.querySelector("#itemPrice"),
@@ -27,7 +27,7 @@ const el = {
 };
 
 el.budget.value = state.budget;
-el.coupon.checked = state.coupon;
+el.discountInput.value = state.discount;
 
 el.form.addEventListener("submit", (event) => {
   event.preventDefault();
@@ -54,8 +54,8 @@ el.budget.addEventListener("input", () => {
   saveAndRender();
 });
 
-el.coupon.addEventListener("change", () => {
-  state.coupon = el.coupon.checked;
+el.discountInput.addEventListener("input", () => {
+  state.discount = toMoney(el.discountInput.value) ?? 0;
   saveAndRender();
 });
 
@@ -96,19 +96,19 @@ el.reset.addEventListener("click", () => {
   if (!state.items.length) return;
   if (!confirm("今日の買い物を全部消す？")) return;
   state.items = [];
-  state.coupon = false;
-  el.coupon.checked = false;
+  state.discount = 0;
+  el.discountInput.value = 0;
   saveAndRender();
 });
 
 function loadState() {
-  const fallback = { budget: 2667, coupon: false, items: [] };
+  const fallback = { budget: 2667, discount: 0, items: [] };
   try {
     const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
     if (!saved || !Array.isArray(saved.items)) return fallback;
     return {
       budget: Number.isFinite(saved.budget) ? saved.budget : fallback.budget,
-      coupon: Boolean(saved.coupon),
+      discount: Number.isFinite(saved.discount) ? Math.max(0, saved.discount) : (saved.coupon ? 500 : 0),
       items: saved.items.filter((item) => typeof item.name === "string" && Number.isFinite(item.price))
     };
   } catch {
@@ -137,7 +137,7 @@ function saveAndRender(shouldSave = true) {
 
 function render() {
   const subtotal = state.items.reduce((sum, item) => sum + item.price, 0);
-  const discount = state.coupon ? Math.min(500, subtotal) : 0;
+  const discount = Math.min(state.discount, subtotal);
   const payment = Math.max(0, subtotal - discount);
   const remaining = state.budget - payment;
 
