@@ -66,12 +66,13 @@ h2 { margin: 0; font-size: 19px; }
 .switch-row input:checked + i::after { transform: translateX(22px); }
 .entry-card { padding: 18px; margin-bottom: 20px; }
 .entry-card h2 { margin-bottom: 14px; }
-#itemForm { display: grid; grid-template-columns: 1fr 112px; gap: 11px; }
+#itemForm { display: grid; grid-template-columns: minmax(0,1fr) 112px 78px; gap: 11px; }
 label { position: relative; font-size: 13px; font-weight: 800; color: #665b6c; }
 label input { display: block; width: 100%; margin-top: 6px; height: 52px; border: 2px solid #ebe2ee; border-radius: 15px; background: #fff; padding: 0 13px; color: #302a35; font-size: 18px; font-weight: 750; }
 label input:focus { outline: 3px solid rgba(245,138,59,.18); border-color: var(--orange); }
-.yen-mark { position: absolute; right: 12px; bottom: 15px; font-size: 15px; color: #76665d; }
+.yen-mark, .piece-mark { position: absolute; right: 12px; bottom: 15px; font-size: 15px; color: #76665d; }
 #itemPrice, #editPrice { padding-right: 34px; text-align: right; }
+#itemQuantity, #editQuantity { padding-right: 32px; text-align: right; }
 .primary-button, .secondary-button { border: 0; border-radius: 14px; min-height: 52px; padding: 0 18px; font-weight: 900; }
 .primary-button { background: linear-gradient(135deg, #ef83a1, #dd6489); color: #fff; box-shadow: 0 7px 17px rgba(211,86,124,.23); }
 .secondary-button { background: #eee7e0; color: #58483e; }
@@ -97,5 +98,5 @@ dialog::backdrop { background: rgba(43,31,25,.5); backdrop-filter: blur(2px); }
   .app-header { align-items: flex-start; }
   h1 { font-size: 26px; }
   .remaining-block strong { font-size: 36px; }
-  #itemForm { grid-template-columns: 1fr 100px; }
+  #itemForm { grid-template-columns: minmax(0,1fr) 94px 70px; gap: 7px; }
 }

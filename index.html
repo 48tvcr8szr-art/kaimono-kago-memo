@@ -8,10 +8,10 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="かごメモ">
   <title>買い物かごメモ</title>
-  <link rel="manifest" href="manifest.webmanifest?v=6">
-  <link rel="icon" href="icon.svg?v=6" type="image/svg+xml">
-  <link rel="apple-touch-icon" href="apple-touch-icon.png?v=6">
-  <link rel="stylesheet" href="styles.css?v=6">
+  <link rel="manifest" href="manifest.webmanifest?v=7">
+  <link rel="icon" href="icon.svg?v=7" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png?v=7">
+  <link rel="stylesheet" href="styles.css?v=7">
 </head>
 <body>
   <main class="app-shell">
@@ -50,7 +50,8 @@
       <h2>商品を追加</h2>
       <form id="itemForm">
         <label>商品名<input id="itemName" autocomplete="off" placeholder="例：ごま油"></label>
-        <label>値段<input id="itemPrice" inputmode="numeric" placeholder="例：458"><span class="yen-mark">円</span></label>
+        <label>1個の値段<input id="itemPrice" inputmode="numeric" placeholder="例：50"><span class="yen-mark">円</span></label>
+        <label>個数<input id="itemQuantity" inputmode="numeric" value="1" aria-label="買う個数"><span class="piece-mark">個</span></label>
         <button class="primary-button" type="submit">かごに追加</button>
       </form>
     </section>
@@ -71,7 +72,8 @@
     <form method="dialog" id="editForm">
       <h2>商品を直す</h2>
       <label>商品名<input id="editName" autocomplete="off"></label>
-      <label>値段<input id="editPrice" inputmode="numeric"><span class="yen-mark">円</span></label>
+      <label>1個の値段<input id="editPrice" inputmode="numeric"><span class="yen-mark">円</span></label>
+      <label>個数<input id="editQuantity" inputmode="numeric"><span class="piece-mark">個</span></label>
       <div class="dialog-actions">
         <button value="cancel" class="secondary-button">やめる</button>
         <button value="save" class="primary-button" id="saveEditButton">直す</button>
@@ -79,6 +81,6 @@
     </form>
   </dialog>
 
-  <script src="app.js?v=6" defer></script>
+  <script src="app.js?v=7" defer></script>
 </body>
 </html>

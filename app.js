@@ -9,6 +9,7 @@ const el = {
   form: document.querySelector("#itemForm"),
   name: document.querySelector("#itemName"),
   price: document.querySelector("#itemPrice"),
+  quantity: document.querySelector("#itemQuantity"),
   list: document.querySelector("#itemList"),
   empty: document.querySelector("#emptyMessage"),
   count: document.querySelector("#itemCount"),
@@ -23,6 +24,7 @@ const el = {
   editForm: document.querySelector("#editForm"),
   editName: document.querySelector("#editName"),
   editPrice: document.querySelector("#editPrice"),
+  editQuantity: document.querySelector("#editQuantity"),
   saveEdit: document.querySelector("#saveEditButton")
 };
 
@@ -33,17 +35,19 @@ el.form.addEventListener("submit", (event) => {
   event.preventDefault();
   const name = el.name.value.trim();
   const price = toMoney(el.price.value);
+  const quantity = toQuantity(el.quantity.value);
   if (!name) {
     el.name.focus();
     return;
   }
-  if (price === null) {
+  if (price === null || quantity === null) {
     el.price.focus();
     return;
   }
-  state.items.push({ id: makeId(), name, price });
+  state.items.push({ id: makeId(), name, price, quantity });
   el.name.value = "";
   el.price.value = "";
+  el.quantity.value = 1;
   saveAndRender();
   el.name.focus();
 });
@@ -73,6 +77,7 @@ el.list.addEventListener("click", (event) => {
   editingId = id;
   el.editName.value = item.name;
   el.editPrice.value = item.price;
+  el.editQuantity.value = item.quantity;
   el.dialog.showModal();
 });
 
@@ -81,11 +86,13 @@ el.editForm.addEventListener("submit", (event) => {
   event.preventDefault();
   const name = el.editName.value.trim();
   const price = toMoney(el.editPrice.value);
-  if (!name || price === null) return;
+  const quantity = toQuantity(el.editQuantity.value);
+  if (!name || price === null || quantity === null) return;
   const item = state.items.find((entry) => entry.id === editingId);
   if (item) {
     item.name = name;
     item.price = price;
+    item.quantity = quantity;
   }
   editingId = null;
   el.dialog.close();
@@ -109,7 +116,9 @@ function loadState() {
     return {
       budget: Number.isFinite(saved.budget) ? saved.budget : fallback.budget,
       discount: Number.isFinite(saved.discount) ? Math.max(0, saved.discount) : (saved.coupon ? 500 : 0),
-      items: saved.items.filter((item) => typeof item.name === "string" && Number.isFinite(item.price))
+      items: saved.items
+        .filter((item) => typeof item.name === "string" && Number.isFinite(item.price))
+        .map((item) => ({ ...item, quantity: Number.isFinite(item.quantity) && item.quantity > 0 ? Math.floor(item.quantity) : 1 }))
     };
   } catch {
     return fallback;
@@ -120,6 +129,12 @@ function toMoney(value) {
   const digits = String(value).replace(/[^0-9]/g, "");
   if (!digits) return null;
   return Math.max(0, Number(digits));
+}
+
+function toQuantity(value) {
+  const quantity = toMoney(value);
+  if (quantity === null || quantity < 1) return null;
+  return Math.floor(quantity);
 }
 
 function makeId() {
@@ -136,7 +151,7 @@ function saveAndRender(shouldSave = true) {
 }
 
 function render() {
-  const subtotal = state.items.reduce((sum, item) => sum + item.price, 0);
+  const subtotal = state.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
   const discount = Math.min(state.discount, subtotal);
   const payment = Math.max(0, subtotal - discount);
   const remaining = state.budget - payment;
@@ -160,7 +175,10 @@ function render() {
     name.textContent = item.name;
     const price = document.createElement("span");
     price.className = "item-price";
-    price.textContent = `${yen(item.price)}円`;
+    const itemTotal = item.price * item.quantity;
+    price.textContent = item.quantity > 1
+      ? `${yen(item.price)}円 × ${item.quantity}個 ＝ ${yen(itemTotal)}円`
+      : `${yen(item.price)}円`;
     info.append(name, price);
 
     const edit = document.createElement("button");
