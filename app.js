@@ -6,6 +6,15 @@ let editingId = null;
 const el = {
   budget: document.querySelector("#budgetInput"),
   discountInput: document.querySelector("#discountInput"),
+  discountStoreLabel: document.querySelector("#discountStoreLabel"),
+  entryStoreLabel: document.querySelector("#entryStoreLabel"),
+  storeTabs: document.querySelector(".store-tabs"),
+  drugstoreTab: document.querySelector("#drugstoreTab"),
+  enableDrugstore: document.querySelector("#enableDrugstore"),
+  storeHint: document.querySelector("#storeHint"),
+  supermarketPayment: document.querySelector("#supermarketPayment"),
+  drugstorePayment: document.querySelector("#drugstorePayment"),
+  drugstoreBreakdown: document.querySelector("#drugstoreBreakdown"),
   mustBuyForm: document.querySelector("#mustBuyForm"),
   mustBuyInput: document.querySelector("#mustBuyInput"),
   mustBuyList: document.querySelector("#mustBuyList"),
@@ -31,12 +40,13 @@ const el = {
   editName: document.querySelector("#editName"),
   editPrice: document.querySelector("#editPrice"),
   editQuantity: document.querySelector("#editQuantity"),
+  editStore: document.querySelector("#editStore"),
   saveEdit: document.querySelector("#saveEditButton"),
   deleteEdit: document.querySelector("#deleteEditButton")
 };
 
 el.budget.value = state.budget;
-el.discountInput.value = state.discount;
+el.discountInput.value = state.discounts[state.activeStore];
 
 el.form.addEventListener("submit", (event) => {
   event.preventDefault();
@@ -51,7 +61,7 @@ el.form.addEventListener("submit", (event) => {
     el.price.focus();
     return;
   }
-  state.items.push({ id: makeId(), name, price, quantity });
+  state.items.push({ id: makeId(), name, price, quantity, store: state.activeStore });
   el.name.value = "";
   el.price.value = "";
   el.quantity.value = 1;
@@ -66,7 +76,22 @@ el.budget.addEventListener("input", () => {
 });
 
 el.discountInput.addEventListener("input", () => {
-  state.discount = toMoney(el.discountInput.value) ?? 0;
+  state.discounts[state.activeStore] = toMoney(el.discountInput.value) ?? 0;
+  saveAndRender();
+});
+
+el.storeTabs.addEventListener("click", (event) => {
+  const button = event.target.closest("button[data-store]");
+  if (!button) return;
+  state.activeStore = button.dataset.store;
+  el.discountInput.value = state.discounts[state.activeStore];
+  saveAndRender();
+});
+
+el.enableDrugstore.addEventListener("click", () => {
+  state.drugstoreEnabled = true;
+  state.activeStore = "drugstore";
+  el.discountInput.value = state.discounts.drugstore;
   saveAndRender();
 });
 
@@ -74,7 +99,7 @@ el.mustBuyForm.addEventListener("submit", (event) => {
   event.preventDefault();
   const name = el.mustBuyInput.value.trim();
   if (!name) return el.mustBuyInput.focus();
-  state.mustBuys.push({ id: makeId(), name, checked: false });
+  state.mustBuys.push({ id: makeId(), name, checked: false, store: state.activeStore });
   el.mustBuyInput.value = "";
   saveAndRender();
   el.mustBuyInput.focus();
@@ -104,6 +129,7 @@ el.list.addEventListener("click", (event) => {
   el.editName.value = item.name;
   el.editPrice.value = item.price;
   el.editQuantity.value = item.quantity;
+  el.editStore.value = item.store;
   el.dialog.showModal();
 });
 
@@ -119,6 +145,8 @@ el.editForm.addEventListener("submit", (event) => {
     item.name = name;
     item.price = price;
     item.quantity = quantity;
+    item.store = el.editStore.value;
+    if (item.store === "drugstore") state.drugstoreEnabled = true;
   }
   editingId = null;
   el.dialog.close();
@@ -138,25 +166,35 @@ el.reset.addEventListener("click", () => {
   if (!confirm("今日の買い物を全部消す？")) return;
   state.items = [];
   state.mustBuys = [];
-  state.discount = 0;
+  state.discounts = { supermarket: 0, drugstore: 0 };
+  state.activeStore = "supermarket";
+  state.drugstoreEnabled = false;
   el.discountInput.value = 0;
   saveAndRender();
 });
 
 function loadState() {
-  const fallback = { budget: 2667, discount: 0, items: [], mustBuys: [] };
+  const fallback = { budget: 2667, discounts: { supermarket: 0, drugstore: 0 }, activeStore: "supermarket", drugstoreEnabled: false, items: [], mustBuys: [] };
   try {
     const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
     if (!saved || !Array.isArray(saved.items)) return fallback;
+    const discounts = saved.discounts && typeof saved.discounts === "object"
+      ? { supermarket: Number(saved.discounts.supermarket) || 0, drugstore: Number(saved.discounts.drugstore) || 0 }
+      : { supermarket: Number.isFinite(saved.discount) ? Math.max(0, saved.discount) : (saved.coupon ? 500 : 0), drugstore: 0 };
+    const items = saved.items
+      .filter((item) => typeof item.name === "string" && Number.isFinite(item.price))
+      .map((item) => ({ ...item, store: item.store === "drugstore" ? "drugstore" : "supermarket", quantity: Number.isFinite(item.quantity) && item.quantity > 0 ? Math.floor(item.quantity) : 1 }));
+    const mustBuys = Array.isArray(saved.mustBuys)
+      ? saved.mustBuys.filter((item) => typeof item.name === "string").map((item) => ({ id: item.id || makeId(), name: item.name, checked: Boolean(item.checked), store: item.store === "drugstore" ? "drugstore" : "supermarket" }))
+      : [];
+    const needsDrugstore = Boolean(saved.drugstoreEnabled) || items.some((item) => item.store === "drugstore") || mustBuys.some((item) => item.store === "drugstore") || discounts.drugstore > 0;
     return {
       budget: Number.isFinite(saved.budget) ? saved.budget : fallback.budget,
-      discount: Number.isFinite(saved.discount) ? Math.max(0, saved.discount) : (saved.coupon ? 500 : 0),
-      mustBuys: Array.isArray(saved.mustBuys)
-        ? saved.mustBuys.filter((item) => typeof item.name === "string").map((item) => ({ id: item.id || makeId(), name: item.name, checked: Boolean(item.checked) }))
-        : [],
-      items: saved.items
-        .filter((item) => typeof item.name === "string" && Number.isFinite(item.price))
-        .map((item) => ({ ...item, quantity: Number.isFinite(item.quantity) && item.quantity > 0 ? Math.floor(item.quantity) : 1 }))
+      discounts,
+      activeStore: saved.activeStore === "drugstore" && needsDrugstore ? "drugstore" : "supermarket",
+      drugstoreEnabled: needsDrugstore,
+      mustBuys,
+      items
     };
   } catch {
     return fallback;
@@ -189,9 +227,15 @@ function saveAndRender(shouldSave = true) {
 }
 
 function render() {
-  const subtotal = state.items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-  const discount = Math.min(state.discount, subtotal);
-  const payment = Math.max(0, subtotal - discount);
+  const supermarketSubtotal = storeSubtotal("supermarket");
+  const drugstoreSubtotal = storeSubtotal("drugstore");
+  const supermarketDiscount = Math.min(state.discounts.supermarket, supermarketSubtotal);
+  const drugstoreDiscount = Math.min(state.discounts.drugstore, drugstoreSubtotal);
+  const supermarketPayment = supermarketSubtotal - supermarketDiscount;
+  const drugstorePayment = drugstoreSubtotal - drugstoreDiscount;
+  const subtotal = supermarketSubtotal + drugstoreSubtotal;
+  const discount = supermarketDiscount + drugstoreDiscount;
+  const payment = supermarketPayment + drugstorePayment;
   const remaining = state.budget - payment;
 
   el.subtotal.textContent = yen(subtotal);
@@ -202,6 +246,16 @@ function render() {
   el.remainingBlock.classList.toggle("over", remaining < 0);
   el.count.textContent = `${state.items.length}点`;
   el.empty.hidden = state.items.length > 0;
+  const storeName = state.activeStore === "drugstore" ? "ドラッグストア" : "スーパー";
+  el.discountStoreLabel.textContent = storeName;
+  el.entryStoreLabel.textContent = storeName;
+  el.supermarketPayment.textContent = yen(supermarketPayment);
+  el.drugstorePayment.textContent = yen(drugstorePayment);
+  el.drugstoreTab.hidden = !state.drugstoreEnabled;
+  el.enableDrugstore.hidden = state.drugstoreEnabled;
+  el.drugstoreBreakdown.hidden = !state.drugstoreEnabled;
+  el.storeHint.textContent = state.drugstoreEnabled ? "店を押してから商品を入れる" : "いつもはスーパーだけで大丈夫";
+  el.storeTabs.querySelectorAll("button[data-store]").forEach((button) => button.classList.toggle("active", button.dataset.store === state.activeStore));
 
   const remainingMustBuys = state.mustBuys.filter((item) => !item.checked).length;
   el.mustBuyCount.textContent = `残り${remainingMustBuys}`;
@@ -219,7 +273,10 @@ function render() {
     mark.textContent = item.checked ? "✓" : "";
     const name = document.createElement("span");
     name.textContent = item.name;
-    button.append(mark, name);
+    const store = document.createElement("small");
+    store.className = `store-badge ${item.store}`;
+    store.textContent = item.store === "drugstore" ? "ドラッグ" : "スーパー";
+    button.append(mark, name, store);
     row.append(button);
     return row;
   }));
@@ -231,7 +288,10 @@ function render() {
     info.className = "item-info";
     const name = document.createElement("span");
     name.className = "item-name";
-    name.textContent = item.name;
+    const store = document.createElement("small");
+    store.className = `store-badge ${item.store}`;
+    store.textContent = item.store === "drugstore" ? "ドラッグ" : "スーパー";
+    name.append(item.name, store);
     const price = document.createElement("span");
     price.className = "item-price";
     const itemTotal = item.price * item.quantity;
@@ -250,6 +310,10 @@ function render() {
     row.append(info, edit);
     return row;
   }));
+}
+
+function storeSubtotal(store) {
+  return state.items.filter((item) => item.store === store).reduce((sum, item) => sum + (item.price * item.quantity), 0);
 }
 
 render();

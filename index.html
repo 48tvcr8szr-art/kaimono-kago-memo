@@ -8,10 +8,10 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="かごメモ">
   <title>買い物かごメモ</title>
-  <link rel="manifest" href="manifest.webmanifest?v=9">
-  <link rel="icon" href="icon.svg?v=9" type="image/svg+xml">
-  <link rel="apple-touch-icon" href="apple-touch-icon.png?v=9">
-  <link rel="stylesheet" href="styles.css?v=9">
+  <link rel="manifest" href="manifest.webmanifest?v=10">
+  <link rel="icon" href="icon.svg?v=10" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png?v=10">
+  <link rel="stylesheet" href="styles.css?v=10">
 </head>
 <body>
   <main class="app-shell">
@@ -37,11 +37,24 @@
         <div><span>割引</span><strong>−<span id="discountAmount">0</span>円</strong></div>
         <div class="payment"><span>支払予定</span><strong><span id="paymentAmount">0</span>円</strong></div>
       </div>
+      <div class="store-breakdown">
+        <span>スーパー <b><span id="supermarketPayment">0</span>円</b></span>
+        <span id="drugstoreBreakdown" hidden>ドラッグストア <b><span id="drugstorePayment">0</span>円</b></span>
+      </div>
+    </section>
+
+    <section class="store-card">
+      <div class="store-title"><span>今いるお店</span><small id="storeHint">いつもはスーパーだけで大丈夫</small></div>
+      <div class="store-tabs">
+        <button type="button" class="active" data-store="supermarket">スーパー</button>
+        <button type="button" data-store="drugstore" id="drugstoreTab" hidden>ドラッグストア</button>
+      </div>
+      <button type="button" class="enable-drugstore" id="enableDrugstore">＋ ドラッグストアも使う</button>
     </section>
 
     <section class="coupon-card">
       <div class="discount-row">
-        <label for="discountInput"><b>割引・ポイント</b><small>使う金額を入力</small></label>
+        <label for="discountInput"><b><span id="discountStoreLabel">スーパー</span>の割引・ポイント</b><small>このお店で使う金額</small></label>
         <div class="discount-input"><input id="discountInput" inputmode="numeric" value="0" aria-label="割引・ポイントの金額"><span>円</span></div>
       </div>
     </section>
@@ -61,7 +74,7 @@
     </section>
 
     <section class="entry-card">
-      <h2>商品を追加</h2>
+      <h2><span id="entryStoreLabel">スーパー</span>の商品を追加</h2>
       <form id="itemForm">
         <label>商品名<input id="itemName" autocomplete="off" placeholder="例：ごま油"></label>
         <label>1個の値段<input id="itemPrice" inputmode="numeric" placeholder="例：50"><span class="yen-mark">円</span></label>
@@ -88,6 +101,7 @@
       <label>商品名<input id="editName" autocomplete="off"></label>
       <label>1個の値段<input id="editPrice" inputmode="numeric"><span class="yen-mark">円</span></label>
       <label>個数<input id="editQuantity" inputmode="numeric"><span class="piece-mark">個</span></label>
+      <label>お店<select id="editStore"><option value="supermarket">スーパー</option><option value="drugstore">ドラッグストア</option></select></label>
       <div class="dialog-actions">
         <button value="cancel" class="secondary-button">やめる</button>
         <button value="save" class="primary-button" id="saveEditButton">直す</button>
@@ -96,6 +110,6 @@
     </form>
   </dialog>
 
-  <script src="app.js?v=9" defer></script>
+  <script src="app.js?v=10" defer></script>
 </body>
 </html>

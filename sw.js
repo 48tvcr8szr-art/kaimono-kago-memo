@@ -1,5 +1,5 @@
-const CACHE_NAME = "shopping-basket-v9";
-const ASSETS = ["./?v=9", "./index.html", "./styles.css?v=9", "./app.js?v=9", "./manifest.webmanifest?v=9", "./icon.svg?v=9", "./apple-touch-icon.png?v=9"];
+const CACHE_NAME = "shopping-basket-v10";
+const ASSETS = ["./?v=10", "./index.html", "./styles.css?v=10", "./app.js?v=10", "./manifest.webmanifest?v=10", "./icon.svg?v=10", "./apple-touch-icon.png?v=10"];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS)));
