@@ -8,10 +8,10 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="かごメモ">
   <title>買い物かごメモ</title>
-  <link rel="manifest" href="manifest.webmanifest?v=8">
-  <link rel="icon" href="icon.svg?v=8" type="image/svg+xml">
-  <link rel="apple-touch-icon" href="apple-touch-icon.png?v=8">
-  <link rel="stylesheet" href="styles.css?v=8">
+  <link rel="manifest" href="manifest.webmanifest?v=9">
+  <link rel="icon" href="icon.svg?v=9" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png?v=9">
+  <link rel="stylesheet" href="styles.css?v=9">
 </head>
 <body>
   <main class="app-shell">
@@ -44,6 +44,20 @@
         <label for="discountInput"><b>割引・ポイント</b><small>使う金額を入力</small></label>
         <div class="discount-input"><input id="discountInput" inputmode="numeric" value="0" aria-label="割引・ポイントの金額"><span>円</span></div>
       </div>
+    </section>
+
+    <section class="must-buy-card">
+      <div class="section-heading must-buy-heading">
+        <div><p>買い忘れ防止</p><h2>今日ぜったい買う</h2></div>
+        <span id="mustBuyCount">残り0</span>
+      </div>
+      <form id="mustBuyForm">
+        <input id="mustBuyInput" autocomplete="off" placeholder="例：食器用洗剤" aria-label="ぜったい買うもの">
+        <button type="submit">追加</button>
+      </form>
+      <p class="must-buy-empty" id="mustBuyEmpty">思いついたら、ここへ先に置いておける。</p>
+      <ul id="mustBuyList" aria-live="polite"></ul>
+      <button type="button" class="clear-checked-button" id="clearCheckedButton" hidden>チェック済みを片づける</button>
     </section>
 
     <section class="entry-card">
@@ -82,6 +96,6 @@
     </form>
   </dialog>
 
-  <script src="app.js?v=8" defer></script>
+  <script src="app.js?v=9" defer></script>
 </body>
 </html>

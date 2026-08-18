@@ -28,7 +28,7 @@ h1 { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans",
 h1::after { content: "♥"; display: inline-block; margin-left: 8px; color: #e986a2; font-size: .36em; vertical-align: top; transform: translateY(5px) rotate(8deg); }
 h2 { margin: 0; font-size: 19px; }
 .text-button { border: 0; background: transparent; color: #7b6559; padding: 10px 2px; font-weight: 700; white-space: nowrap; }
-.summary-card, .coupon-card, .entry-card { background: rgba(255,255,255,.96); border: 1px solid rgba(231, 219, 235, .9); border-radius: 24px; box-shadow: var(--shadow); }
+.summary-card, .coupon-card, .entry-card, .must-buy-card { background: rgba(255,255,255,.96); border: 1px solid rgba(231, 219, 235, .9); border-radius: 24px; box-shadow: var(--shadow); }
 .summary-card { overflow: hidden; margin-bottom: 12px; }
 .budget-row { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 15px 18px; border-bottom: 1px solid var(--line); font-weight: 800; }
 .money-input { display: flex; align-items: center; gap: 5px; }
@@ -48,6 +48,20 @@ h2 { margin: 0; font-size: 19px; }
 .summary-grid .payment { grid-column: 1 / -1; border-top: 1px solid var(--line); background: #fff9fc; flex-direction: row; align-items: center; justify-content: space-between; }
 .summary-grid .payment strong { color: var(--orange-dark); font-size: 29px; }
 .coupon-card { margin-bottom: 12px; padding: 2px 4px; }
+.must-buy-card { margin-bottom: 12px; padding: 17px; }
+.must-buy-heading { align-items: flex-end; padding: 0 1px 12px; }
+.must-buy-heading p { margin: 0 0 2px; color: var(--orange-dark); font-size: 11px; font-weight: 850; letter-spacing: .08em; }
+#mustBuyForm { display: grid; grid-template-columns: minmax(0,1fr) 72px; gap: 8px; }
+#mustBuyForm input { min-width: 0; height: 48px; border: 2px solid #ebe2ee; border-radius: 14px; padding: 0 13px; font-size: 17px; font-weight: 750; }
+#mustBuyForm input:focus { outline: 3px solid rgba(228,111,145,.16); border-color: var(--orange); }
+#mustBuyForm button { border: 0; border-radius: 14px; background: #e87597; color: #fff; font-weight: 900; }
+.must-buy-empty { margin: 13px 2px 0; color: #89776c; font-size: 13px; }
+#mustBuyList { list-style: none; margin: 12px 0 0; padding: 0; display: grid; gap: 7px; }
+#mustBuyList button { width: 100%; min-height: 48px; border: 1px solid #eee2ed; border-radius: 14px; background: #fffafd; padding: 8px 12px; display: flex; align-items: center; gap: 10px; color: #302a35; text-align: left; font-weight: 850; }
+#mustBuyList button.checked { background: #f3f0f8; color: #817888; text-decoration: line-through; }
+.check-mark { width: 25px; height: 25px; flex: 0 0 25px; border: 2px solid #d9c4d5; border-radius: 8px; display: grid; place-items: center; color: #fff; text-decoration: none; }
+#mustBuyList button.checked .check-mark { border-color: #8a7fd1; background: #8a7fd1; }
+.clear-checked-button { width: 100%; min-height: 42px; margin-top: 10px; border: 0; border-radius: 12px; background: #f2edf3; color: #75697b; font-weight: 800; }
 .discount-row { min-height: 82px; padding: 13px 14px; display: flex; align-items: center; justify-content: space-between; gap: 14px; }
 .discount-row > label { display: flex; flex-direction: column; flex: 1; gap: 3px; }
 .discount-row b { color: #302a35; font-size: 18px; }

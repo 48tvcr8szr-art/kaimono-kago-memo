@@ -6,6 +6,12 @@ let editingId = null;
 const el = {
   budget: document.querySelector("#budgetInput"),
   discountInput: document.querySelector("#discountInput"),
+  mustBuyForm: document.querySelector("#mustBuyForm"),
+  mustBuyInput: document.querySelector("#mustBuyInput"),
+  mustBuyList: document.querySelector("#mustBuyList"),
+  mustBuyCount: document.querySelector("#mustBuyCount"),
+  mustBuyEmpty: document.querySelector("#mustBuyEmpty"),
+  clearChecked: document.querySelector("#clearCheckedButton"),
   form: document.querySelector("#itemForm"),
   name: document.querySelector("#itemName"),
   price: document.querySelector("#itemPrice"),
@@ -64,6 +70,30 @@ el.discountInput.addEventListener("input", () => {
   saveAndRender();
 });
 
+el.mustBuyForm.addEventListener("submit", (event) => {
+  event.preventDefault();
+  const name = el.mustBuyInput.value.trim();
+  if (!name) return el.mustBuyInput.focus();
+  state.mustBuys.push({ id: makeId(), name, checked: false });
+  el.mustBuyInput.value = "";
+  saveAndRender();
+  el.mustBuyInput.focus();
+});
+
+el.mustBuyList.addEventListener("click", (event) => {
+  const button = event.target.closest("button[data-id]");
+  if (!button) return;
+  const item = state.mustBuys.find((entry) => entry.id === button.dataset.id);
+  if (!item) return;
+  item.checked = !item.checked;
+  saveAndRender();
+});
+
+el.clearChecked.addEventListener("click", () => {
+  state.mustBuys = state.mustBuys.filter((item) => !item.checked);
+  saveAndRender();
+});
+
 el.list.addEventListener("click", (event) => {
   const button = event.target.closest("button[data-id]");
   if (!button) return;
@@ -104,22 +134,26 @@ el.deleteEdit.addEventListener("click", () => {
 });
 
 el.reset.addEventListener("click", () => {
-  if (!state.items.length) return;
+  if (!state.items.length && !state.mustBuys.length) return;
   if (!confirm("今日の買い物を全部消す？")) return;
   state.items = [];
+  state.mustBuys = [];
   state.discount = 0;
   el.discountInput.value = 0;
   saveAndRender();
 });
 
 function loadState() {
-  const fallback = { budget: 2667, discount: 0, items: [] };
+  const fallback = { budget: 2667, discount: 0, items: [], mustBuys: [] };
   try {
     const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
     if (!saved || !Array.isArray(saved.items)) return fallback;
     return {
       budget: Number.isFinite(saved.budget) ? saved.budget : fallback.budget,
       discount: Number.isFinite(saved.discount) ? Math.max(0, saved.discount) : (saved.coupon ? 500 : 0),
+      mustBuys: Array.isArray(saved.mustBuys)
+        ? saved.mustBuys.filter((item) => typeof item.name === "string").map((item) => ({ id: item.id || makeId(), name: item.name, checked: Boolean(item.checked) }))
+        : [],
       items: saved.items
         .filter((item) => typeof item.name === "string" && Number.isFinite(item.price))
         .map((item) => ({ ...item, quantity: Number.isFinite(item.quantity) && item.quantity > 0 ? Math.floor(item.quantity) : 1 }))
@@ -168,6 +202,27 @@ function render() {
   el.remainingBlock.classList.toggle("over", remaining < 0);
   el.count.textContent = `${state.items.length}点`;
   el.empty.hidden = state.items.length > 0;
+
+  const remainingMustBuys = state.mustBuys.filter((item) => !item.checked).length;
+  el.mustBuyCount.textContent = `残り${remainingMustBuys}`;
+  el.mustBuyEmpty.hidden = state.mustBuys.length > 0;
+  el.clearChecked.hidden = !state.mustBuys.some((item) => item.checked);
+  el.mustBuyList.replaceChildren(...state.mustBuys.map((item) => {
+    const row = document.createElement("li");
+    const button = document.createElement("button");
+    button.type = "button";
+    button.dataset.id = item.id;
+    button.className = item.checked ? "checked" : "";
+    button.setAttribute("aria-pressed", String(item.checked));
+    const mark = document.createElement("span");
+    mark.className = "check-mark";
+    mark.textContent = item.checked ? "✓" : "";
+    const name = document.createElement("span");
+    name.textContent = item.name;
+    button.append(mark, name);
+    row.append(button);
+    return row;
+  }));
 
   el.list.replaceChildren(...state.items.map((item) => {
     const row = document.createElement("li");
